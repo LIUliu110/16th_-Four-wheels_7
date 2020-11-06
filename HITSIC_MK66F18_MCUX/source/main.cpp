@@ -147,6 +147,11 @@ void main(void)
 
     while (true)
     {
+       // GPIO_PinWrite(PTC,19,1U);
+                int i=20000000;
+                while(i>0)
+                    i--;
+
         //TODO: 在这里添加车模保护代码
     }
 }
