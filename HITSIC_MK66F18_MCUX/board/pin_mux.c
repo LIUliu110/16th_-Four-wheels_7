@@ -72,6 +72,7 @@ pin_labels:
 - {pin_num: '11', pin_signal: PTE8/I2S0_RXD1/I2S0_RX_FS/LPUART0_TX/FTM3_CH3, label: BUTTON_RT, identifier: BUTTON_RT}
 - {pin_num: '12', pin_signal: PTE9/LLWU_P17/I2S0_TXD1/I2S0_RX_BCLK/LPUART0_RX/FTM3_CH4, label: BUTTON_LF, identifier: BUTTON_LF}
 - {pin_num: '126', pin_signal: PTC19/UART3_CTS_b/ENET0_1588_TMR3/FB_CS3_b/FB_BE7_0_BLS31_24_b/SDRAM_DQM0/FB_TA_b, label: BEEP, identifier: BEEP}
+- {pin_num: '103', pin_signal: ADC0_SE14/TSI0_CH13/PTC0/SPI0_PCS4/PDB0_EXTRG/USB0_SOF_OUT/FB_AD14/SDRAM_A22/I2S0_TXD1, label: LED, identifier: LED}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -126,6 +127,7 @@ RTEPIN_Basic:
   - {pin_num: '33', peripheral: ADC1, signal: VREFL, pin_signal: VREFL}
   - {pin_num: '34', peripheral: ADC0, signal: VALTL, pin_signal: VSSA}
   - {pin_num: '34', peripheral: ADC1, signal: VALTL, pin_signal: VSSA}
+  - {pin_num: '103', peripheral: GPIOC, signal: 'GPIO, 0', pin_signal: ADC0_SE14/TSI0_CH13/PTC0/SPI0_PCS4/PDB0_EXTRG/USB0_SOF_OUT/FB_AD14/SDRAM_A22/I2S0_TXD1, direction: OUTPUT}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -140,6 +142,15 @@ void RTEPIN_Basic(void)
 {
     /* Port A Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortA);
+    /* Port C Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortC);
+
+    gpio_pin_config_t LED_config = {
+        .pinDirection = kGPIO_DigitalOutput,
+        .outputLogic = 0U
+    };
+    /* Initialize GPIO functionality on pin PTC0 (pin 103)  */
+    GPIO_PinInit(RTEPIN_BASIC_LED_GPIO, RTEPIN_BASIC_LED_PIN, &LED_config);
 
     /* PORTA0 (pin 50) is configured as JTAG_TCLK */
     PORT_SetPinMux(RTEPIN_BASIC_SWO_CLK_PORT, RTEPIN_BASIC_SWO_CLK_PIN, kPORT_MuxAlt7);
@@ -152,6 +163,9 @@ void RTEPIN_Basic(void)
 
     /* PORTA5 (pin 55) is configured as JTAG_TRST_b */
     PORT_SetPinMux(RTEPIN_BASIC_RST_PORT, RTEPIN_BASIC_RST_PIN, kPORT_MuxAlt7);
+
+    /* PORTC0 (pin 103) is configured as PTC0 */
+    PORT_SetPinMux(RTEPIN_BASIC_LED_PORT, RTEPIN_BASIC_LED_PIN, kPORT_MuxAsGpio);
 }
 
 /* clang-format off */

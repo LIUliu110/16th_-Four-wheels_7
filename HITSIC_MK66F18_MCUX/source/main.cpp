@@ -82,6 +82,8 @@ FATFS fatfs;                                   //逻辑驱动器的工作区
 /** SCLIB_TEST */
 #include "sc_test.hpp"
 
+void BEEP_test(void);//11.07添加  外部中断函数声明
+void pit_ledtest(void);//11.07添加 定时器中断函数声明
 
 void MENU_DataSetUp(void);
 
@@ -126,11 +128,17 @@ void main(void)
     DISP_SSD1306_Init();
     extern const uint8_t DISP_image_100thAnniversary[8][128];
     DISP_SSD1306_BufferUpload((uint8_t*) DISP_image_100thAnniversary);
-    /** 初始化菜单 */
-    MENU_Init();
-    MENU_Data_NvmReadRegionConfig();
-    MENU_Data_NvmRead(menu_currRegionNum);
-    /** 菜单挂起 */
+    DISP_SSD1306_delay_ms(1000);
+
+    extern const uint8_t DISP_juxing[8][128];           //11.07显示矩形作业
+    DISP_SSD1306_BufferUpload((uint8_t*) DISP_juxing);
+    DISP_SSD1306_delay_ms(1000);
+
+   /** 初始化菜单 */
+   MENU_Init();
+   MENU_Data_NvmReadRegionConfig();
+   MENU_Data_NvmRead(menu_currRegionNum);
+   /** 菜单挂起 */
     MENU_Suspend();
     /** 初始化摄像头 */
     //TODO: 在这里初始化摄像头
@@ -140,29 +148,56 @@ void main(void)
     MENU_Resume();
     /** 控制环初始化 */
     //TODO: 在这里初始化控制环
+
+    //pit初始化
+//    PORT_SetPinInterruptConfig(PORTE, 10U, kPORT_InterruptFallingEdge);//11.07添加 五项按键ok是GPIOE,10号角
+//    extInt_t::insert(PORTE, 10U, BEEP_test);//11.07添加 五项按键ok是GPIOE,10号角,第三个参数是中断函数
+//
+//    pitMgr_t::insert(5000U, 23U, pit_ledtest, pitMgr_t::enable);//11.07添加 pitMgr定时中断，第一个参数的单位是ms,第二个参数是取余数的值，第三个参数是中断函数
+
     /** 初始化结束，开启总中断 */
     HAL_ExitCritical();
 
     float f = arm_sin_f32(0.6f);
-
     while (true)
     {
-       GPIO_PinWrite(PTC,19,1U);
-                int i=20000000;
-                while(i>0)
-                    i--;
-//////////
-
+//        GPIO_PinWrite(PTC,0,0U);
+//        DISP_SSD1306_delay_ms(1000);
+//        GPIO_PinWrite(PTC,0,1U);
+//        DISP_SSD1306_delay_ms(300);
         //TODO: 在这里添加车模保护代码
     }
 }
 
+void pit_ledtest(void)//11.07添加
+{
+    GPIO_PortToggle(GPIOC,1U<<0);
+}
+void BEEP_test(void)//11.07添加
+{
+    GPIO_PortToggle(GPIOC,1U<<0);
+   // GPIO_PinWrite(GPIOC,0,0U);
+}
+
+
 void MENU_DataSetUp(void)
 {
     MENU_ListInsert(menu_menuRoot, MENU_ItemConstruct(nullType, NULL, "EXAMPLE", 0, 0));
+
+    static float P = 10.9, I = 3.14, D = 12.14;
+    static menu_list_t *PID;
+
+    PID = MENU_ListConstruct("PID", 20, menu_menuRoot);
+    assert(PID);
+    MENU_ListInsert(menu_menuRoot, MENU_ItemConstruct(menuType, PID, "PID", 0, 0));
+
+        MENU_ListInsert(PID, MENU_ItemConstruct(varfType, &P, "P", 10, menuItem_data_global));
+        MENU_ListInsert(PID, MENU_ItemConstruct(varfType, &I, "I", 11, menuItem_data_global));
+        MENU_ListInsert(PID, MENU_ItemConstruct(varfType, &D, "D", 1, menuItem_data_global));
+
+
     //TODO: 在这里添加子菜单和菜单项
 }
-
 void CAM_ZF9V034_DmaCallback(edma_handle_t *handle, void *userData, bool transferDone, uint32_t tcds)
 {
     //TODO: 补完本回调函数
