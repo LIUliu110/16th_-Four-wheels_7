@@ -42,6 +42,7 @@ uint8_t mid_line[CAMERA_H];
 int all_connect_num = 0;//所有白条子数
 uint8_t top_road;//赛道最高处所在行数
 uint8_t threshold = 230;//阈值
+int foresight = 84;//前瞻数值
 uint8_t* fullBuffer;
 ////////////////////////////////////////////
 //功能：二值化
@@ -427,10 +428,31 @@ void image_main()
 
 float get_error()
 {
-    float a=94-mid_line[85];
+    float a=94-mid_line[foresight];
     return a;
 }
+int ckeck_out_road(void)//检测跑出赛道函数
+{
+    uint8_t* my_map;
+    int count = 0;//检测该范围黑点个数
+    for (int i = 115; i >= 80; i--)
+    {
+        my_map = &IMG[i][0];
+        for (int j = 60; j <= 110; j++)
+        {
+            if (*(my_map + j) ==0)
+            {
+                //*(my_map + j) = blue;
+                count++;
+            }
+        }
+    }
+    if (count >= 1500)
+        return 0;
+    else
+        return 1;
 
+}
 
 
 

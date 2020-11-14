@@ -929,7 +929,7 @@ instance:
         - direction: 'kDSPI_MsbFirst'
         - pcsToSckDelayInNanoSec: '1000'
         - lastSckToPcsDelayInNanoSec: '1000'
-        - betweenTransferDelayInNanoSec: '1000'
+        - betweenTransferDelayInNanoSec: '0'
       - whichPcs: 'PCS0_SS'
       - pcsActiveHighOrLow: 'kDSPI_PcsActiveLow'
       - enableContinuousSCK: 'false'
@@ -948,7 +948,7 @@ const dspi_master_config_t OLED_SPI_config = {
     .direction = kDSPI_MsbFirst,
     .pcsToSckDelayInNanoSec = 1000UL,
     .lastSckToPcsDelayInNanoSec = 1000UL,
-    .betweenTransferDelayInNanoSec = 1000UL
+    .betweenTransferDelayInNanoSec = 0UL
   },
   .whichPcs = kDSPI_Pcs0,
   .pcsActiveHighOrLow = kDSPI_PcsActiveLow,

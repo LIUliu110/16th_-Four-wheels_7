@@ -83,11 +83,16 @@ FATFS fatfs;                                   //逻辑驱动器的工作区
 #include "sc_test.hpp"
 
 #include "image.h"
-
+#include "sc_host.h"
 float error_n=0;
 float error_n_1=0;
 const float servo_mid=7.45;
 float servo_pwm=7.45;
+float motor_speed=20.0;
+float motor_speed_now;
+float P = 0.015,  D = 0.01;
+float data[5]={20,30,40};
+int counter1=0,counter2=0;
 void BEEP_test(void);//11.07添加  外部中断函数声明
 void pit_ledtest(void);//11.07添加 定时器中断函数声明
 void motor(void);//11.10 定时器中断，电机转动函数
@@ -96,7 +101,7 @@ void servo_pid()
 {
     float pwm_error=0;
     error_n=get_error();
-    pwm_error=0.015*error_n+0.01*(error_n-error_n_1);
+    pwm_error=P*error_n+D*(error_n-error_n_1);
     servo_pwm=servo_mid+pwm_error;
     if(servo_pwm<6.8)
         servo_pwm=6.8;
@@ -157,11 +162,11 @@ void main(void)
 //    DISP_SSD1306_delay_ms(1000);
 
    /** 初始化菜单 */
-//   MENU_Init();
-//   MENU_Data_NvmReadRegionConfig();
-//   MENU_Data_NvmRead(menu_currRegionNum);
+   MENU_Init();
+   MENU_Data_NvmReadRegionConfig();
+   MENU_Data_NvmRead(menu_currRegionNum);
    /** 菜单挂起 */
-   // MENU_Suspend();
+    MENU_Suspend();
     /** 初始化摄像头 */
     cam_zf9v034_configPacket_t cameraCfg;
         CAM_ZF9V034_GetDefaultConfig(&cameraCfg);                                   //设置摄像头配置
@@ -177,39 +182,53 @@ void main(void)
         disp_ssd1306_frameBuffer_t *dispBuffer = new disp_ssd1306_frameBuffer_t;
         DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, imageBuffer0);
         DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, imageBuffer1);
-    DMADVP_TransferStart(DMADVP0, &dmadvpHandle);
+        DMADVP_TransferStart(DMADVP0, &dmadvpHandle);
     //TODO: 在这里初始化摄像头
     /** 初始化IMU */
     //TODO: 在这里初始化IMU（MPU6050）
     /** 菜单就绪 */
-   // MENU_Resume();
+    MENU_Resume();
     /** 控制环初始化 */
     //TODO: 在这里初始化控制环
 
     //pit初始化
 //    PORT_SetPinInterruptConfig(PORTE, 10U, kPORT_InterruptFallingEdge);//11.07添加 五项按键ok是GPIOE,10号角
-//    extInt_t::insert(PORTE, 10U, BEEP_test);//11.07添加 五项按键ok是GPIOE,10号角,第三个参数是中断函数
+//   extInt_t::insert(PORTE, 10U, BEEP_test);//11.07添加 五项按键ok是GPIOE,10号角,第三个参数是中断函数
 //
 //    pitMgr_t::insert(5000U, 23U, pit_ledtest, pitMgr_t::enable);//11.07添加 pitMgr定时中断，第一个参数的单位是ms,第二个参数是取余数的值，第三个参数是中断函数
     pitMgr_t::insert(20U, 3U, servo, pitMgr_t::enable);//舵机中断
+    pitMgr_t::insert(5U, 1U, motor, pitMgr_t::enable);//电机中断
 
     /** 初始化结束，开启总中断 */
     HAL_ExitCritical();
-    SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,0);//电机恒定速度输出
-    SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,30);
-    SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,30);
-    SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_3,20000,0);
+    //SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,0);//电机恒定速度输出
+    //SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,30);
+//    SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,30);
+//    SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_3,20000,0);
     //SCFTM_PWM_ChangeHiRes(FTM3,kFTM_Chnl_7,50,7.45);
-
     float f = arm_sin_f32(0.6f);
     while (true)
     {
-
+        //SCHOST_VarUpload(data+1,1);
         while (kStatus_Success != DMADVP_TransferGetFullBuffer(DMADVP0, &dmadvpHandle, &fullBuffer));
         THRE();
         //head_clear();
         image_main();
         servo_pid();
+        if(ckeck_out_road()==0)
+        {
+            motor_speed_now=0;
+        }
+        else
+            motor_speed_now=motor_speed;
+
+        if(GPIO_PinRead(GPIOA,15)==1)
+        {
+            counter2=0;
+                        if(counter1==0)
+                        {
+                            MENU_Suspend();
+                        }//只让菜单被挂起一次，在主函数多次执行的时候不重复挂起，引入标志位counter1,counter2
                 dispBuffer->Clear();
                 const uint8_t imageTH = 100;
                 for (int i = 0; i < cameraCfg.imageRow; i += 2)
@@ -225,9 +244,20 @@ void main(void)
                         }
                     }
                 }
-
+                counter1=1;
                 DISP_SSD1306_BufferUpload((uint8_t*) dispBuffer);
+
+         }
+        else{
+            counter1=0;
+                   if(counter2==0)
+                   {
+                       MENU_Resume();
+                   }
+                   counter2=1;
+        }
                 DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, fullBuffer);
+
 
         //TODO: 在这里添加车模保护代码
     }
@@ -246,21 +276,30 @@ void servo()
 {
     SCFTM_PWM_ChangeHiRes(FTM3,kFTM_Chnl_7,50,servo_pwm);
 }
-
+void motor(void)
+{
+    SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,0);//电机恒定速度输出
+        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,motor_speed_now);
+        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,motor_speed_now);
+        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_3,20000,0);
+}
 void MENU_DataSetUp(void)
 {
     MENU_ListInsert(menu_menuRoot, MENU_ItemConstruct(nullType, NULL, "EXAMPLE", 0, 0));
 
-    static float P = 10.9, I = 3.14, D = 12.14;
-    static menu_list_t *PID;
+    extern uint8_t threshold;
+    extern int foresight;
+    static menu_list_t *parameter;
 
-    PID = MENU_ListConstruct("PID", 20, menu_menuRoot);
-    assert(PID);
-    MENU_ListInsert(menu_menuRoot, MENU_ItemConstruct(menuType, PID, "PID", 0, 0));
+    parameter = MENU_ListConstruct("parameter", 20, menu_menuRoot);
+    assert(parameter);
+    MENU_ListInsert(menu_menuRoot, MENU_ItemConstruct(menuType,parameter, "parameter", 0, 0));
 
-        MENU_ListInsert(PID, MENU_ItemConstruct(varfType, &P, "P", 10, menuItem_data_global));
-        MENU_ListInsert(PID, MENU_ItemConstruct(varfType, &I, "I", 11, menuItem_data_global));
-        MENU_ListInsert(PID, MENU_ItemConstruct(varfType, &D, "D", 1, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &P, "P", 10, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &D, "D", 1, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &threshold, "threshold", 11, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &motor_speed, "motor_speed", 2, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &foresight, "foresight", 3, menuItem_data_global));
 
 
     //TODO: 在这里添加子菜单和菜单项

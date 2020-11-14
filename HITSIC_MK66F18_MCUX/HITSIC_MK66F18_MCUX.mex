@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding= "UTF-8" ?>
-<configuration name="MK66FX1M0xxx18" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8 http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8.xsd" uuid="eac0712e-e3fe-4e0e-b3ed-75736beff7ac" version="1.8" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<configuration name="" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8 http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8.xsd" uuid="a1828958-6c63-496a-9ce9-10f2365969fd" version="1.8" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
    <common>
       <processor>MK66FX1M0xxx18</processor>
       <package>MK66FX1M0VLQ18</package>
@@ -7,7 +7,7 @@
       <cores selected="core0">
          <core name="Cortex-M4F" id="core0" description="M4 core"/>
       </cores>
-      <description>Configuration imported from HITSIC_MK66F18_MCUX</description>
+      <description></description>
    </common>
    <preferences>
       <validate_boot_init_only>true</validate_boot_init_only>
@@ -82,7 +82,6 @@
                <pin_label pin_num="11" pin_signal="PTE8/I2S0_RXD1/I2S0_RX_FS/LPUART0_TX/FTM3_CH3" label="BUTTON_RT" identifier="BUTTON_RT"/>
                <pin_label pin_num="12" pin_signal="PTE9/LLWU_P17/I2S0_TXD1/I2S0_RX_BCLK/LPUART0_RX/FTM3_CH4" label="BUTTON_LF" identifier="BUTTON_LF"/>
                <pin_label pin_num="126" pin_signal="PTC19/UART3_CTS_b/ENET0_1588_TMR3/FB_CS3_b/FB_BE7_0_BLS31_24_b/SDRAM_DQM0/FB_TA_b" label="BEEP" identifier="BEEP"/>
-               <pin_label pin_num="103" pin_signal="ADC0_SE14/TSI0_CH13/PTC0/SPI0_PCS4/PDB0_EXTRG/USB0_SOF_OUT/FB_AD14/SDRAM_A22/I2S0_TXD1" label="LED" identifier="LED"/>
             </pin_labels>
          </pins_profile>
          <functions_list>
@@ -160,7 +159,6 @@
                   <pin peripheral="ADC1" signal="VREFL" pin_num="33" pin_signal="VREFL"/>
                   <pin peripheral="ADC0" signal="VALTL" pin_num="34" pin_signal="VSSA"/>
                   <pin peripheral="ADC1" signal="VALTL" pin_num="34" pin_signal="VSSA"/>
-                  <pin peripheral="GPIOE" signal="GPIO, 10" pin_num="13" pin_signal="PTE10/LLWU_P18/I2C3_SDA/I2S0_TXD0/LPUART0_CTS_b/FTM3_CH5/USB1_ID"/>
                </pins>
             </function>
             <function name="RTEPIN_Digital">
@@ -734,7 +732,7 @@
             </clock_configuration>
          </clock_configurations>
       </clocks>
-      <dcdx name="DCDx" version="3.0" enabled="false" update_project_code="true">
+      <dcdx name="DCDx" version="2.0" enabled="false" update_project_code="true">
          <generated_project_files/>
          <dcdx_profile>
             <processor_version>N/A</processor_version>
@@ -878,7 +876,7 @@
                   </dependency>
                </dependencies>
                <instances>
-                  <instance name="DMA" uuid="a0f5a0b4-cbc9-4674-90e7-44351d0b9d1f" type="edma" type_id="edma_6d0dd4e17e2f179c7d42d98767129ede" mode="basic" peripheral="DMA" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="DMA" uuid="ec130828-41b9-4bb8-8e26-44147ed50cc5" type="edma" type_id="edma_6d0dd4e17e2f179c7d42d98767129ede" mode="basic" peripheral="DMA" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="fsl_edma" quick_selection="default">
                         <struct name="common_settings">
                            <setting name="enableContinuousLinkMode" value="false"/>
@@ -900,7 +898,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="GPIOA" uuid="813ed98d-db2c-4199-8d2c-3f389c6174e9" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOA" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="GPIOA" uuid="8dfcd384-4525-49cd-a9a3-f21c0da88ae6" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOA" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="fsl_gpio">
                         <setting name="enable_irq" value="true"/>
                         <struct name="port_interrupt">
@@ -912,7 +910,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="GPIOB" uuid="cf37be66-e42a-4ad9-93b9-b225ab58ee65" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOB" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="GPIOB" uuid="1b9d7ac2-0004-44f5-9eb9-a8773606ed84" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOB" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="fsl_gpio">
                         <setting name="enable_irq" value="true"/>
                         <struct name="port_interrupt">
@@ -924,7 +922,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="GPIOC" uuid="65b657a1-68e2-4bf1-bf66-ef4cef02777d" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOC" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="GPIOC" uuid="df923883-cef1-476f-8438-06549cd7701a" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOC" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="fsl_gpio">
                         <setting name="enable_irq" value="true"/>
                         <struct name="port_interrupt">
@@ -936,7 +934,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="GPIOD" uuid="8a96281a-a4f4-42e9-97e0-98d9ab1ad663" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOD" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="GPIOD" uuid="58379000-1009-4d21-bbbe-16a9fa850dd9" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOD" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="fsl_gpio">
                         <setting name="enable_irq" value="true"/>
                         <struct name="port_interrupt">
@@ -948,7 +946,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="GPIOE" uuid="4d9f6108-cf2f-4a1f-97f8-9a8ad01c402b" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOE" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="GPIOE" uuid="42a83f94-3934-4108-8318-295f2662dbe6" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOE" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="fsl_gpio">
                         <setting name="enable_irq" value="true"/>
                         <struct name="port_interrupt">
@@ -960,10 +958,11 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="LPTMR0" uuid="17c57039-0b2c-4c22-a071-eecf070efd1d" type="lptmr" type_id="lptmr_48552e76e8733b28a9c768b6d8d4fefa" mode="LPTMR_GENERAL" peripheral="LPTMR0" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="LPTMR0" uuid="52ee19f1-bd0f-43df-a081-a512cd36141a" type="lptmr" type_id="lptmr_48552e76e8733b28a9c768b6d8d4fefa" mode="LPTMR_GENERAL" peripheral="LPTMR0" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="fsl_lptmr">
                         <struct name="lptmr_config">
                            <setting name="timerMode" value="kLPTMR_TimerModeTimeCounter"/>
+                           <setting name="pinSelect" value="ALT.0"/>
                            <setting name="pinPolarity" value="kLPTMR_PinPolarityActiveHigh"/>
                            <setting name="enableFreeRunning" value="false"/>
                            <setting name="bypassPrescaler" value="true"/>
@@ -982,7 +981,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="PIT" uuid="854c264b-f929-4965-a501-5b98e4c3e884" type="pit" type_id="pit_a4782ba5223c8a2527ba91aeb2bc4159" mode="LPTMR_GENERAL" peripheral="PIT" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="PIT" uuid="2a6342ba-379e-4a94-829d-9c987e900ee6" type="pit" type_id="pit_a4782ba5223c8a2527ba91aeb2bc4159" mode="LPTMR_GENERAL" peripheral="PIT" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="fsl_pit">
                         <setting name="enableRunInDebug" value="false"/>
                         <struct name="timingConfig">
@@ -1205,7 +1204,7 @@
                   </dependency>
                </dependencies>
                <instances>
-                  <instance name="CAM_UART" uuid="e1b6715f-74c0-4968-946f-5a0c78d4534c" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="polling" peripheral="UART3" enabled="true" comment="" custom_name_enabled="true">
+                  <instance name="CAM_UART" uuid="f9bd00cf-a79f-4370-9ac1-417475d17e3b" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="polling" peripheral="UART3" enabled="true" comment="" custom_name_enabled="true">
                      <config_set name="uartConfig_t">
                         <struct name="uartConfig">
                            <setting name="clockSource" value="BusInterfaceClock"/>
@@ -1221,7 +1220,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="DBG_LPUART" uuid="876c54ba-4996-472f-85b6-74b1442e670c" type="lpuart" type_id="lpuart_54a65a580e3462acdbacefd5299e0cac" mode="polling" peripheral="LPUART0" enabled="true" comment="" custom_name_enabled="true">
+                  <instance name="DBG_LPUART" uuid="11ba4d12-5d29-49a9-a34b-7da0ae81f079" type="lpuart" type_id="lpuart_54a65a580e3462acdbacefd5299e0cac" mode="polling" peripheral="LPUART0" enabled="true" comment="" custom_name_enabled="true">
                      <config_set name="lpuartConfig_t">
                         <struct name="lpuartConfig">
                            <setting name="clockSource" value="LpuartClock"/>
@@ -1242,7 +1241,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="EMAG" uuid="93f5ab7a-6f2c-48fa-bab7-f213bff91109" type="adc16" type_id="adc16_7a29cdeb84266e77f0c7ceac1b49fe2d" mode="ADC" peripheral="ADC0" enabled="true" comment="" custom_name_enabled="true">
+                  <instance name="EMAG" uuid="ace9cc8e-65b9-4ba9-ae70-a79d44aedccc" type="adc16" type_id="adc16_7a29cdeb84266e77f0c7ceac1b49fe2d" mode="ADC" peripheral="ADC0" enabled="true" comment="" custom_name_enabled="true">
                      <config_set name="fsl_adc16">
                         <struct name="adc16_config">
                            <setting name="referenceVoltageSource" value="kADC16_ReferenceVoltageSourceVref"/>
@@ -1331,7 +1330,7 @@
                         </array>
                      </config_set>
                   </instance>
-                  <instance name="ENCO_L" uuid="43a4d9dd-0325-480c-9d12-3ed1b01f980a" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="QuadratureDecoder" peripheral="FTM2" enabled="true" comment="" custom_name_enabled="true">
+                  <instance name="ENCO_L" uuid="3195b07e-b50d-4ac2-bfea-e7efcbb3cc62" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="QuadratureDecoder" peripheral="FTM2" enabled="true" comment="" custom_name_enabled="true">
                      <config_set name="ftm_main_config">
                         <struct name="ftm_config">
                            <setting name="prescale" value="kFTM_Prescale_Divide_1"/>
@@ -1389,7 +1388,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="ENCO_R" uuid="15fd590f-4ac6-42c9-be34-6102acb6e4ef" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="QuadratureDecoder" peripheral="FTM1" enabled="true" comment="" custom_name_enabled="true">
+                  <instance name="ENCO_R" uuid="b268a8b6-c7b0-4c7e-9f36-727c7eaaa137" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="QuadratureDecoder" peripheral="FTM1" enabled="true" comment="" custom_name_enabled="true">
                      <config_set name="ftm_main_config">
                         <struct name="ftm_config">
                            <setting name="prescale" value="kFTM_Prescale_Divide_1"/>
@@ -1444,7 +1443,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="IMU_I2C" uuid="6e3fc456-8d18-4c2c-bba2-552f6c9f39d8" type="i2c" type_id="i2c_2566d7363e7e9aaedabb432110e372d7" mode="I2C_Polling" peripheral="I2C0" enabled="true" comment="" custom_name_enabled="true">
+                  <instance name="IMU_I2C" uuid="97a26c15-65d4-40ad-8424-a419a5c8482f" type="i2c" type_id="i2c_2566d7363e7e9aaedabb432110e372d7" mode="I2C_Polling" peripheral="I2C0" enabled="true" comment="" custom_name_enabled="true">
                      <config_set name="fsl_i2c">
                         <setting name="i2c_mode" value="kI2C_Master"/>
                         <setting name="clockSource" value="BusInterfaceClock"/>
@@ -1457,7 +1456,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="MOTOR" uuid="bc74a2e4-bbe6-4b92-a38a-3abb54869d36" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="CenterAligned" peripheral="FTM0" enabled="true" comment="" custom_name_enabled="true">
+                  <instance name="MOTOR" uuid="030267df-b61c-493a-b86c-dce83c21ad51" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="CenterAligned" peripheral="FTM0" enabled="true" comment="" custom_name_enabled="true">
                      <config_set name="ftm_main_config">
                         <struct name="ftm_config">
                            <setting name="clockSource" value="kFTM_SystemClock"/>
@@ -1533,7 +1532,7 @@
                         </array>
                      </config_set>
                   </instance>
-                  <instance name="OLED_SPI" uuid="d37a8be8-4175-467a-a599-347de02ccd26" type="dspi" type_id="dspi_305e5b03c593d065f61ded8061d15797" mode="DSPI_Polling" peripheral="SPI2" enabled="true" comment="" custom_name_enabled="true">
+                  <instance name="OLED_SPI" uuid="6954732e-6518-426f-bb8b-ed4f098dc56f" type="dspi" type_id="dspi_305e5b03c593d065f61ded8061d15797" mode="DSPI_Polling" peripheral="SPI2" enabled="true" comment="" custom_name_enabled="true">
                      <config_set name="fsl_dspi">
                         <setting name="dspi_mode" value="kDSPI_Master"/>
                         <setting name="clockSource" value="BusInterfaceClock"/>
@@ -1548,7 +1547,7 @@
                               <setting name="direction" value="kDSPI_MsbFirst"/>
                               <setting name="pcsToSckDelayInNanoSec" value="1000"/>
                               <setting name="lastSckToPcsDelayInNanoSec" value="1000"/>
-                              <setting name="betweenTransferDelayInNanoSec" value="1000"/>
+                              <setting name="betweenTransferDelayInNanoSec" value="0"/>
                            </struct>
                            <setting name="whichPcs" value="PCS0_SS"/>
                            <setting name="pcsActiveHighOrLow" value="kDSPI_PcsActiveLow"/>
@@ -1559,7 +1558,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="SERVO" uuid="a5837200-8bb5-4e75-ad17-d44162251473" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="CenterAligned" peripheral="FTM3" enabled="true" comment="" custom_name_enabled="true">
+                  <instance name="SERVO" uuid="383dbbe0-5935-4483-adc2-020540619dd1" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="CenterAligned" peripheral="FTM3" enabled="true" comment="" custom_name_enabled="true">
                      <config_set name="ftm_main_config">
                         <struct name="ftm_config">
                            <setting name="clockSource" value="kFTM_SystemClock"/>
@@ -1616,7 +1615,7 @@
                         </array>
                      </config_set>
                   </instance>
-                  <instance name="WLAN_UART" uuid="3cee2da1-eb06-425d-a63a-9cdaac6dab97" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="polling" peripheral="UART0" enabled="true" comment="" custom_name_enabled="true">
+                  <instance name="WLAN_UART" uuid="8c36b29d-c0e9-4469-86f2-f1455c4f9402" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="polling" peripheral="UART0" enabled="true" comment="" custom_name_enabled="true">
                      <config_set name="uartConfig_t">
                         <struct name="uartConfig">
                            <setting name="clockSource" value="BusInterfaceClock"/>
@@ -1636,19 +1635,19 @@
             </functional_group>
          </functional_groups>
          <components>
-            <component name="system" uuid="09998c82-f175-4016-ad32-ae5151de325d" type_id="system_54b53072540eeeb8f8e9343e71f28176">
+            <component name="system" uuid="fe8e23c5-8508-4bc0-8f3f-8ad8ffccbcad" type_id="system_54b53072540eeeb8f8e9343e71f28176">
                <config_set_global name="global_system_definitions">
                   <setting name="user_definitions" value=""/>
                   <setting name="user_includes" value=""/>
                </config_set_global>
             </component>
-            <component name="msg" uuid="7d61a0f7-3e93-48c9-961d-0672d4a7412f" type_id="msg_6e2baaf3b97dbeef01c0043275f9a0e7">
+            <component name="msg" uuid="88a2880c-2da5-496b-ba17-525e60acf8f9" type_id="msg_6e2baaf3b97dbeef01c0043275f9a0e7">
                <config_set_global name="global_messages"/>
             </component>
-            <component name="generic_uart" uuid="3a4593b8-a7a5-420d-a5c8-a9928c592593" type_id="generic_uart_8cae00565451cf2346eb1b8c624e73a6">
+            <component name="generic_uart" uuid="8c022370-511e-4a40-9c85-0ca88c93bcb0" type_id="generic_uart_8cae00565451cf2346eb1b8c624e73a6">
                <config_set_global name="global_uart"/>
             </component>
-            <component name="generic_can" uuid="0c7c6852-fef4-42b6-b2d3-df0b0d5c9327" type_id="generic_can_1bfdd78b1af214566c1f23cf6a582d80">
+            <component name="generic_can" uuid="e785cbd8-ccce-4082-9e9f-6476847f45dc" type_id="generic_can_1bfdd78b1af214566c1f23cf6a582d80">
                <config_set_global name="global_can"/>
             </component>
          </components>
