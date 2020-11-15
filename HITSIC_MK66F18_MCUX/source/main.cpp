@@ -179,11 +179,11 @@ void main(void)
         dmadvp_handle_t dmadvpHandle;
         DMADVP_TransferCreateHandle(&dmadvpHandle, DMADVP0, CAM_ZF9V034_UnitTestDmaCallback);
         uint8_t *imageBuffer0 = new uint8_t[DMADVP0->imgSize];
-        uint8_t *imageBuffer1 = new uint8_t[DMADVP0->imgSize];
-        //uint8_t *fullBuffer = NULL;
+//        uint8_t *imageBuffer1 = new uint8_t[DMADVP0->imgSize];
+        uint8_t *fullBuffer = NULL;
         disp_ssd1306_frameBuffer_t *dispBuffer = new disp_ssd1306_frameBuffer_t;
         DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, imageBuffer0);
-        DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, imageBuffer1);
+//        DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, imageBuffer1);
         DMADVP_TransferStart(DMADVP0, &dmadvpHandle);
     //TODO: 在这里初始化摄像头
     /** 初始化IMU */
@@ -259,7 +259,7 @@ void main(void)
                    counter2=1;
         }
                 DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, fullBuffer);
-
+                DMADVP_TransferStart(DMADVP0, &dmadvpHandle);
 
         //TODO: 在这里添加车模保护代码
     }
