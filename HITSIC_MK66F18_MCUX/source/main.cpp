@@ -59,7 +59,7 @@
 #include "sys_uartmgr.hpp"
 #include "cm_backtrace.h"
 //#include "easyflash.h"
-
+#include "lib_graphic.hpp"
 /** HITSIC_Module_APP */
 #include "app_menu.hpp"
 #include "app_svbmp.hpp"
@@ -121,6 +121,8 @@ void CAM_ZF9V034_DmaCallback(edma_handle_t *handle, void *userData, bool transfe
 inv::i2cInterface_t imu_i2c(nullptr, IMU_INV_I2cRxBlocking, IMU_INV_I2cTxBlocking);
 inv::mpu6050_t imu_6050(imu_i2c);
 
+disp_ssd1306_frameBuffer_t dispBuffer;
+graphic::bufPrint0608_t<disp_ssd1306_frameBuffer_t> bufPrinter(dispBuffer);
 
 void main(void)
 {
