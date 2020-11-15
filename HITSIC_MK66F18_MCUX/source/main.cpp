@@ -209,7 +209,7 @@ void main(void)
     float f = arm_sin_f32(0.6f);
     while (true)
     {
-        //SCHOST_VarUpload(data+1,1);
+        //SCHOST_VarUpload(data+1,1);//wifi数据传输
         while (kStatus_Success != DMADVP_TransferGetFullBuffer(DMADVP0, &dmadvpHandle, &fullBuffer));
         THRE();
         //head_clear();
