@@ -155,9 +155,9 @@ void main(void)
     extInt_t::init();
     /** 初始化OLED屏幕 */
     DISP_SSD1306_Init();
-    extern const uint8_t DISP_image_100thAnniversary[8][128];
-    DISP_SSD1306_BufferUpload((uint8_t*) DISP_image_100thAnniversary);
-    DISP_SSD1306_delay_ms(1000);
+    //extern const uint8_t DISP_image_100thAnniversary[8][128];
+   // DISP_SSD1306_BufferUpload((uint8_t*) DISP_image_100thAnniversary);
+    //DISP_SSD1306_delay_ms(1000);
 
 //    extern const uint8_t DISP_juxing[8][128];           //11.07显示矩形作业
 //    DISP_SSD1306_BufferUpload((uint8_t*) DISP_juxing);
@@ -246,8 +246,8 @@ void main(void)
                         }
                     }
                 }
-                counter1=1;
                 DISP_SSD1306_BufferUpload((uint8_t*) dispBuffer);
+                counter1=1;
 
          }
         else{
