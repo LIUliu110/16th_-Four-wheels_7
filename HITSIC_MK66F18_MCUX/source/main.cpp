@@ -213,6 +213,7 @@ void main(void)
     {
         //SCHOST_VarUpload(data+1,1);//wifi数据传输
         while (kStatus_Success != DMADVP_TransferGetFullBuffer(DMADVP0, &dmadvpHandle, &fullBuffer));
+        SCHOST_ImgUpload(fullBuffer,120,188);
         THRE();
         //head_clear();
         image_main();
