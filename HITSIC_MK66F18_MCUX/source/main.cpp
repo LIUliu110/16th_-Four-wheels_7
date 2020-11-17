@@ -180,7 +180,7 @@ void main(void)
         DMADVP_TransferCreateHandle(&dmadvpHandle, DMADVP0, CAM_ZF9V034_UnitTestDmaCallback);
         uint8_t *imageBuffer0 = new uint8_t[DMADVP0->imgSize];
 //        uint8_t *imageBuffer1 = new uint8_t[DMADVP0->imgSize];
-        uint8_t *fullBuffer = NULL;
+//        uint8_t *fullBuffer = NULL;
         disp_ssd1306_frameBuffer_t *dispBuffer = new disp_ssd1306_frameBuffer_t;
         DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, imageBuffer0);
 //        DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, imageBuffer1);
@@ -213,7 +213,6 @@ void main(void)
     {
         //SCHOST_VarUpload(data+1,1);//wifi数据传输
         while (kStatus_Success != DMADVP_TransferGetFullBuffer(DMADVP0, &dmadvpHandle, &fullBuffer));
-        SCHOST_ImgUpload(fullBuffer,120,188);
         THRE();
         //head_clear();
         image_main();
@@ -261,7 +260,7 @@ void main(void)
         }
                 DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, fullBuffer);
                 DMADVP_TransferStart(DMADVP0, &dmadvpHandle);
-
+                SCHOST_ImgUpload(fullBuffer,120,188);
         //TODO: 在这里添加车模保护代码
     }
 }
