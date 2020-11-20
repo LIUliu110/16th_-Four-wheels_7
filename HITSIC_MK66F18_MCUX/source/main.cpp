@@ -17,6 +17,7 @@
  *   software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
@@ -93,14 +94,25 @@ float motor_speed_now;
 float P = 0.015,  D = 0.01;
 float data[5]={20,30,40};
 int counter1=0,counter2=0;
+float AD[10]={0};
+int SampleTimes=8;
+int LV_Temp[8][10];
+float LV[10];
+float MinLVGot=0.1;
 void BEEP_test(void);//11.07添加  外部中断函数声明
 void pit_ledtest(void);//11.07添加 定时器中断函数声明
 void motor(void);//11.10 定时器中断，电机转动函数
 void servo();
+void error(void);
+void swap(int &a,int &b){
+    int temp=a;
+    a=b;
+    b=temp;
+}
 void servo_pid()
 {
     float pwm_error=0;
-    error_n=get_error();
+    error_n=(float(AD[0])-float(AD[1]))/(float(AD[1])+float(AD[0]));
     pwm_error=P*error_n+D*(error_n-error_n_1);
     servo_pwm=servo_mid+pwm_error;
     if(servo_pwm<6.8)
@@ -110,6 +122,67 @@ void servo_pid()
 
     error_n_1=error_n;
 };
+void LV_Sample()                             // ad采集函数
+{
+  for(uint8_t i=0;i<=SampleTimes-1;i++)
+  {
+    /*获取采样初值*/
+    LV_Temp[0][i]=SCADC_Sample(ADC0,0,10);//这里只有两个电感，所以这个只有两行
+    LV_Temp[1][i]=SCADC_Sample(ADC0,0,17);//adc_once是指的是采集到的初始电感值
+  }
+}
+
+void LV_Get_Val()//约0.3mS                  //对采集的值滤波
+{
+ // 有时会在0-65535(255)间跳动
+  for(uint8_t i=0;i<=8;i++)
+  {
+    for(uint8_t j=0;j<=SampleTimes-1;j++)
+    {
+         if(LV_Temp[i][j]>500)//剔除毛刺信号
+         {
+             LV_Temp[i][j]=500;
+         }
+    }
+  }
+
+  //排序
+  for(uint8_t k=0;k<=8;k++)
+  {
+    for(uint8_t i=0;i<=SampleTimes-2;i++)
+    {
+      for(uint8_t j=i+1;j<=SampleTimes-1;j++)
+      {
+          if(LV_Temp[k][i]>LV_Temp[k][j])
+            swap(LV_Temp[k][i],LV_Temp[k][j]);//交换，swap函数自己写
+      }
+    }
+  }
+
+  for(uint8_t k=0;k<=8;k++)
+  {
+    LV[k]=0;
+    for(uint8_t i=3;i<=SampleTimes-4;i++)
+    {
+         LV[k]+=(float)LV_Temp[k][i];
+    }
+    LV[k]=LV[k]/(SampleTimes-6);
+    if( LV[k] < MinLVGot )
+    {
+       LV[k] = MinLVGot;
+    }
+  }
+
+  AD[0] = LV[0];
+  AD[1] = LV[1];
+  AD[2] = LV[2];
+  AD[3] = LV[3];
+  AD[4] = LV[4];
+  AD[5] = LV[5];
+  AD[6] = LV[6];
+  AD[7] = LV[7];
+  AD[8] = LV[8];//注意这里不要直接用LV数组
+}
 
 void MENU_DataSetUp(void);
 
@@ -200,6 +273,8 @@ void main(void)
 //    pitMgr_t::insert(5000U, 23U, pit_ledtest, pitMgr_t::enable);//11.07添加 pitMgr定时中断，第一个参数的单位是ms,第二个参数是取余数的值，第三个参数是中断函数
     pitMgr_t::insert(20U, 3U, servo, pitMgr_t::enable);//舵机中断
     pitMgr_t::insert(5U, 1U, motor, pitMgr_t::enable);//电机中断
+    pitMgr_t::insert(20U, 1U,error, pitMgr_t::enable);
+
 
     /** 初始化结束，开启总中断 */
     HAL_ExitCritical();
@@ -216,13 +291,13 @@ void main(void)
         THRE();
         //head_clear();
         image_main();
-        servo_pid();
         if(ckeck_out_road()==0)
         {
             motor_speed_now=0;
         }
         else
             motor_speed_now=motor_speed;
+
 
         if(GPIO_PinRead(GPIOA,15)==1)
         {
@@ -281,9 +356,14 @@ void servo()
 void motor(void)
 {
     SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,0);//电机恒定速度输出
-        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,motor_speed_now);
-        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,motor_speed_now);
+        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,motor_speed);
+        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,motor_speed);
         SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_3,20000,0);
+}
+void error(void){
+    LV_Sample();                           // ad采集函数
+    LV_Get_Val();                //对采集的值滤波
+    servo_pid();
 }
 void MENU_DataSetUp(void)
 {
@@ -302,6 +382,8 @@ void MENU_DataSetUp(void)
         MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &threshold, "threshold", 11, menuItem_data_global));
         MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &motor_speed, "motor_speed", 2, menuItem_data_global));
         MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &foresight, "foresight", 3, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &AD[0], "AD[0]", 4, menuItem_data_ROFlag));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &AD[1], "AD[1]", 3, menuItem_data_ROFlag));
 
 
     //TODO: 在这里添加子菜单和菜单项
