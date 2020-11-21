@@ -95,10 +95,13 @@ float P = 0.015,  D = 0.01;
 float data[5]={20,30,40};
 int counter1=0,counter2=0;
 float AD[10]={0};
-int SampleTimes=8;
-int LV_Temp[8][10];
+int SampleTimes=16;
+int LV_Temp[8][20];
 float LV[10];
-float MinLVGot=0.1;
+float MinLVGot=1;
+int mark=0;
+int mark2=0;
+int mark3=0;
 void BEEP_test(void);//11.07添加  外部中断函数声明
 void pit_ledtest(void);//11.07添加 定时器中断函数声明
 void motor(void);//11.10 定时器中断，电机转动函数
@@ -112,7 +115,7 @@ void swap(int &a,int &b){
 void servo_pid()
 {
     float pwm_error=0;
-    error_n=(float(AD[0])-float(AD[1]))/(float(AD[1])+float(AD[0]));
+    error_n=(AD[0]-AD[1])/(AD[1]*AD[0]);
     pwm_error=P*error_n+D*(error_n-error_n_1);
     servo_pwm=servo_mid+pwm_error;
     if(servo_pwm<6.8)
@@ -287,53 +290,72 @@ void main(void)
     while (true)
     {
         //SCHOST_VarUpload(data+1,1);//wifi数据传输
-        while (kStatus_Success != DMADVP_TransferGetFullBuffer(DMADVP0, &dmadvpHandle, &fullBuffer));
-        THRE();
+//        while (kStatus_Success != DMADVP_TransferGetFullBuffer(DMADVP0, &dmadvpHandle, &fullBuffer));
+//        THRE();
         //head_clear();
-        image_main();
-        if(ckeck_out_road()==0)
-        {
-            motor_speed_now=0;
-        }
-        else
-            motor_speed_now=motor_speed;
-
-
-        if(GPIO_PinRead(GPIOA,15)==1)
-        {
-            counter2=0;
-                        if(counter1==0)
-                        {
-                            MENU_Suspend();
-                        }//只让菜单被挂起一次，在主函数多次执行的时候不重复挂起，引入标志位counter1,counter2
-                dispBuffer->Clear();
-                const uint8_t imageTH = 100;
-                for (int i = 0; i < cameraCfg.imageRow; i += 2)
-                {
-                    int16_t imageRow = i >> 1;//除以2 为了加速;
-                    int16_t dispRow = (imageRow / 8) + 1, dispShift = (imageRow % 8);
-                    for (int j = 0; j < cameraCfg.imageCol; j += 2)
-                    {
-                        int16_t dispCol = j >> 1;
-                        if (IMG[i][j]>imageTH)//fullBuffer[i * cameraCfg.imageCol + j] >
-                        {
-                            dispBuffer->SetPixelColor(dispCol, imageRow, 1);
-                        }
-                    }
-                }
-                DISP_SSD1306_BufferUpload((uint8_t*) dispBuffer);
-                counter1=1;
-
-         }
-        else{
-            counter1=0;
-                   if(counter2==0)
+//        image_main();
+        if(AD[0]<=10&&AD[1]<=10)
                    {
-                       MENU_Resume();
+                       motor_speed_now=0;
+                       mark3=1;
                    }
-                   counter2=1;
+             else{
+                    if(mark2!=1){
+                        motor_speed_now=motor_speed;
+                        mark3=0;
+
+                    }
+             }
+
+        if(GPIO_PinRead(GPIOA,9)==1){
+            motor_speed_now=0;
+            mark2=1;
+            mark=0;
         }
-                DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, fullBuffer);
+        else if(GPIO_PinRead(GPIOA,9)==0){
+            if(mark==0)
+            {DISP_SSD1306_delay_ms(3000);}
+            mark2=0;
+            mark=1;
+            if(mark3==0)motor_speed_now=motor_speed;
+        }
+
+
+//        if(GPIO_PinRead(GPIOA,15)==1)
+//        {
+//            counter2=0;
+//                        if(counter1==0)
+//                        {
+//                            MENU_Suspend();
+//                        }//只让菜单被挂起一次，在主函数多次执行的时候不重复挂起，引入标志位counter1,counter2
+//                dispBuffer->Clear();
+//                const uint8_t imageTH = 100;
+//                for (int i = 0; i < cameraCfg.imageRow; i += 2)
+//                {
+//                    int16_t imageRow = i >> 1;//除以2 为了加速;
+//                    int16_t dispRow = (imageRow / 8) + 1, dispShift = (imageRow % 8);
+//                    for (int j = 0; j < cameraCfg.imageCol; j += 2)
+//                    {
+//                        int16_t dispCol = j >> 1;
+//                        if (IMG[i][j]>imageTH)//fullBuffer[i * cameraCfg.imageCol + j] >
+//                        {
+//                            dispBuffer->SetPixelColor(dispCol, imageRow, 1);
+//                        }
+//                    }
+//                }
+//                DISP_SSD1306_BufferUpload((uint8_t*) dispBuffer);
+//                counter1=1;
+//
+//         }
+//        else{
+//            counter1=0;
+//                   if(counter2==0)
+//                   {
+//                       MENU_Resume();
+//                   }
+//                   counter2=1;
+//        }
+//                DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, fullBuffer);
 
 
         //TODO: 在这里添加车模保护代码
@@ -355,9 +377,9 @@ void servo()
 }
 void motor(void)
 {
-    SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,0);//电机恒定速度输出
-        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,motor_speed);
-        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,motor_speed);
+        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,0);//电机恒定速度输出
+        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,motor_speed_now);
+        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,motor_speed_now);
         SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_3,20000,0);
 }
 void error(void){
@@ -382,8 +404,8 @@ void MENU_DataSetUp(void)
         MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &threshold, "threshold", 11, menuItem_data_global));
         MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &motor_speed, "motor_speed", 2, menuItem_data_global));
         MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &foresight, "foresight", 3, menuItem_data_global));
-        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &AD[0], "AD[0]", 4, menuItem_data_ROFlag));
-        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &AD[1], "AD[1]", 3, menuItem_data_ROFlag));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &AD[0], "AD[0]", 4, menuItem_data_ROFlag));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &AD[1], "AD[1]", 3, menuItem_data_ROFlag));
 
 
     //TODO: 在这里添加子菜单和菜单项
