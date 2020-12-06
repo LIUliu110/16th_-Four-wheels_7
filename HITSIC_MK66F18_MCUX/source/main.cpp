@@ -87,32 +87,62 @@ FATFS fatfs;                                   //逻辑驱动器的工作区
 
 #include "image.h"
 #include "sc_host.h"
-float error_n=0;
-float error_n_1=0;
-const float servo_mid=7.45;
-float servo_pwm=7.45;
-float motor_speed=20.0;
-float motor_speed_now;
-float P = 0.015,  D = 0.01;
-float data[5]={20,30,40};
-int counter1=0,counter2=0;
+#include "all_control.h"
+
+
+float value[5];
+//float error_n_=0;
+//float error_n_1_=0;
+//const float servo_mid=7.45;
+//float servo_pwm=7.45;
+//float motor_speed=20.0;
+//float motor_speed_now;
+//float P = 0.015,  D = 0.01;
+//float data[5]={20,30,40};
+//int counter1=0,counter2=0;
+//int mark=0;
+//float fang=15;
+//float motor_test_[2];
 void BEEP_test(void);//11.07添加  外部中断函数声明
 void pit_ledtest(void);//11.07添加 定时器中断函数声明
-void motor(void);//11.10 定时器中断，电机转动函数
-void servo();
-void servo_pid()
-{
-    float pwm_error=0;
-    error_n=get_error();
-    pwm_error=P*error_n+D*(error_n-error_n_1);
-    servo_pwm=servo_mid+pwm_error;
-    if(servo_pwm<6.8)
-        servo_pwm=6.8;
-    else if(servo_pwm>8.2)
-        servo_pwm=8.2;
+//void motor(void);//11.10 定时器中断，电机转动函数
+//void servo();
+//void servo_pid()
+//{
+//    float pwm_error=0;
+//    error_n_=get_error();
+//    pwm_error=P*error_n_+D*(error_n_-error_n_1_);
+//    servo_pwm=servo_mid+pwm_error;
+//    if(servo_pwm<6.8)
+//        servo_pwm=6.8;
+//    else if(servo_pwm>8.2)
+//        servo_pwm=8.2;
+//
+//    error_n_1_=error_n_;
+//};
+//
+//void motor_test(){
+//    if(mark==0){
+//            Motorsp_Set(fang,fang);
+//            fang=-15;
+//            mark=1;
+//            }
+//     else if(mark==1){
+//            Motorsp_Set(fang,fang);
+//            fang=15;
+//            mark=0;
+//     }
+//}
 
-    error_n_1=error_n;
-};
+void wifi(){
+   value[0]=fang;
+   value[1]=mot_left;
+   value[2]=mot_right;
+    SCHOST_VarUpload(value,3);//wifi数据传输
+
+
+
+}
 
 
 void MENU_DataSetUp(void);
@@ -203,7 +233,9 @@ void main(void)
 //
 //    pitMgr_t::insert(5000U, 23U, pit_ledtest, pitMgr_t::enable);//11.07添加 pitMgr定时中断，第一个参数的单位是ms,第二个参数是取余数的值，第三个参数是中断函数
     pitMgr_t::insert(20U, 3U, servo, pitMgr_t::enable);//舵机中断
-    pitMgr_t::insert(5U, 1U, motor, pitMgr_t::enable);//电机中断
+    pitMgr_t::insert(5U, 2U,my_motor_ctr, pitMgr_t::enable);//电机中断
+    pitMgr_t::insert(2000U, 10U, motor_test, pitMgr_t::enable);
+//    pitMgr_t::insert(5U, 1U,wifi, pitMgr_t::enable);//wifi中断
 
     /** 初始化结束，开启总中断 */
     HAL_ExitCritical();
@@ -211,11 +243,11 @@ void main(void)
     //cDISP_SSD1306_BufferUpload((uint8_t*) DISP_image_100thAnniversary);
     //DISP_SSD1306_delay_ms(100);
     //DISP_SSD1306_BufferUploadDMA((uint8_t*) DISP_image_100thAnniversary);
-    CAM_ZF9V034_UnitTest();
+    //CAM_ZF9V034_UnitTest();
     //DISP_SSD1306_BufferUpload((uint8_t*) &dispBuffer);
 
     //EF_BasicTest();
-    MENU_Resume();
+//    MENU_Resume();
     /** 内置DSP函数测试 */
     float f = arm_sin_f32(0.6f);
 
@@ -223,28 +255,45 @@ void main(void)
 //    if(true);
 //    menu_itemIfce_t *itme = MENU_DirGetItem(list, "region_i");
 
+
     while (true)
     {
-        //SCHOST_VarUpload(data+1,1);//wifi数据传输
+//        mot_left =SCFTM_GetSpeed(FTM1);
+//        mot_right = -SCFTM_GetSpeed(FTM2);
+//        float a=(float)mot_left;
+//        float b=(float)mot_left;
+//        SCHOST_VarUpload(&a,1);//wifi数据传输
+           value[0]=fang;
+//           value[1]=mot_left;
+           value[1]=M_left_pwm;
+           value[3]=M_right_pwm;
+           value[2]=mot_left;
+           value[4]=mot_right;
+
+            SCHOST_VarUpload(value,5);//wifi数据传输
+
+
+
+
         while (kStatus_Success != DMADVP_TransferGetFullBuffer(DMADVP0, &dmadvpHandle, &fullBuffer));
         THRE();
         //head_clear();
         image_main();
         servo_pid();
-        if(ckeck_out_road()==0)
-        {
-            motor_speed_now=0;
-        }
-        else
-            motor_speed_now=motor_speed;
-
-        if(GPIO_PinRead(GPIOA,15)==1)
-        {
-            counter2=0;
-                        if(counter1==0)
-                        {
-                            MENU_Suspend();
-                        }//只让菜单被挂起一次，在主函数多次执行的时候不重复挂起，引入标志位counter1,counter2
+//        if(ckeck_out_road()==0)
+//        {
+//            motor_speed_now=0;
+//        }
+//        else
+//            motor_speed_now=motor_speed;
+//
+//        if(GPIO_PinRead(GPIOA,15)==1)
+//        {
+//            counter2=0;
+//                        if(counter1==0)
+//                        {
+//                            MENU_Suspend();
+//                        }//只让菜单被挂起一次，在主函数多次执行的时候不重复挂起，引入标志位counter1,counter2
                 dispBuffer->Clear();
                 const uint8_t imageTH = 100;
                 for (int i = 0; i < cameraCfg.imageRow; i += 2)
@@ -263,15 +312,15 @@ void main(void)
                 DISP_SSD1306_BufferUpload((uint8_t*) dispBuffer);
                 counter1=1;
 
-         }
-        else{
-            counter1=0;
-                   if(counter2==0)
-                   {
-                       MENU_Resume();
-                   }
-                   counter2=1;
-        }
+//         }
+//        else{
+//            counter1=0;
+//                   if(counter2==0)
+//                   {
+//                       MENU_Resume();
+//                   }
+//                   counter2=1;
+//        }
                 DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, fullBuffer);
 
 
@@ -279,26 +328,26 @@ void main(void)
     }
 }
 
-void pit_ledtest(void)//11.07添加
-{
-    GPIO_PortToggle(GPIOC,1U<<0);
-}
-void BEEP_test(void)//11.07添加
-{
-    GPIO_PortToggle(GPIOC,1U<<0);
-   // GPIO_PinWrite(GPIOC,0,0U);
-}
-void servo()
-{
-    SCFTM_PWM_ChangeHiRes(FTM3,kFTM_Chnl_7,50,servo_pwm);
-}
-void motor(void)
-{
-    SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,0);//电机恒定速度输出
-        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,motor_speed_now);
-        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,motor_speed_now);
-        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_3,20000,0);
-}
+//void pit_ledtest(void)//11.07添加
+//{
+//    GPIO_PortToggle(GPIOC,1U<<0);
+//}
+//void BEEP_test(void)//11.07添加
+//{
+//    GPIO_PortToggle(GPIOC,1U<<0);
+//   // GPIO_PinWrite(GPIOC,0,0U);
+//}
+//void servo()
+//{
+//    SCFTM_PWM_ChangeHiRes(FTM3,kFTM_Chnl_7,50,servo_pwm);
+//}
+//void motor(void)
+//{
+//    SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,0);//电机恒定速度输出
+//        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,motor_speed_now);
+//        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,motor_speed_now);
+//        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_3,20000,0);
+//}
 void MENU_DataSetUp(void)
 {
     MENU_ListInsert(menu_menuRoot, MENU_ItemConstruct(nullType, NULL, "EXAMPLE", 0, 0));
