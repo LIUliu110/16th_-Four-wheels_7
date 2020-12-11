@@ -46,6 +46,9 @@ uint8_t* fullBuffer;
 
 uint8_t threshold = 230;//阈值
 int foresight = 80;//前瞻数值
+int banmaxian_flag=0;//斑马线标志位
+int cross_flag=0;//十字的标志位
+
 //12.10定义的点结构体
 typedef struct {
     int x;
@@ -431,40 +434,28 @@ void image_main()
     search_white_range();
     find_all_connect();
     find_road();
+    banmaxian();
     /*到此处为止，我们已经得到了属于赛道的结构体数组my_road[CAMERA_H]*/
     ordinary_two_line();
-    get_mid_line();
 
-    //十字的判断
-    if (
-        my_road[foresight].white_num == 1 &&
-        (
-        (my_road[foresight].connected[1].width)>160
-        ||(my_road[foresight-2].connected[1].width) > 160
-        ||(my_road[foresight-4].connected[1].width) > 160
-        ||(my_road[foresight-6].connected[1].width) > 160
-        || (my_road[foresight - 8].connected[1].width) > 160
-        || (my_road[foresight+2].connected[1].width) > 160
-        || (my_road[foresight + 4].connected[1].width) > 160
-        //|| (my_road[foresight + 6].connected[1].width) > 160
-        )
-        )
+    //为十字
+    if (cross_flag==1)
     {
         search_leftdown_point();
         search_rightdown_point();
         search_leftup_point();
         search_rightup_point();
-//       connect_line_plan();
-//        for (int i = 3; i < 115; i++)
-//        {
-//            for (int j = 3; j < 185; j++)
-//            {
-//                if (IMG[i][j] == 11)
-//                    left_line[i] = j;
-//                if (IMG[i][j] == 12)
-//                    right_line[i] = j;
-//            }
-//        }
+       connect_line_plan();
+        for (int i = 3; i < 115; i++)
+        {
+            for (int j = 3; j < 185; j++)
+            {
+                if (IMG[i][j] == 11)
+                    left_line[i] = j;
+                if (IMG[i][j] == 12)
+                    right_line[i] = j;
+            }
+        }
     }
 
     get_mid_line();
@@ -709,3 +700,49 @@ void search_rightup_point()
     }
 }
 
+void banmaxian()
+{
+    int count_flag = 0;
+
+    if ((my_road[foresight].white_num > 5)
+       || (my_road[foresight - 2].white_num) > 5
+       || (my_road[foresight - 4].white_num) > 5
+       //|| (my_road[foresight + 2].white_num) > 5
+       //|| (my_road[foresight + 4].white_num) > 5
+       )
+    {
+        if((my_road[foresight - 1].white_num = 1))
+        count_flag ++;
+    }
+
+    if((my_road[foresight].white_num > 5)
+       || (my_road[foresight - 2].white_num) > 5
+       || (my_road[foresight - 4].white_num) > 5)
+    {
+        if(count_flag == 1)
+        {
+            banmaxian_flag = 1;
+        }
+
+    }
+}
+void cross_judge()
+{
+    cross_flag=0;
+    if (
+          my_road[foresight].white_num == 1 &&
+          (
+          (my_road[foresight].connected[1].width)>160
+          ||(my_road[foresight-2].connected[1].width) > 160
+          ||(my_road[foresight-4].connected[1].width) > 160
+          ||(my_road[foresight-6].connected[1].width) > 160
+          || (my_road[foresight - 8].connected[1].width) > 160
+          || (my_road[foresight+2].connected[1].width) > 160
+          || (my_road[foresight + 4].connected[1].width) > 160
+          //|| (my_road[foresight + 6].connected[1].width) > 160
+          )
+          )
+        cross_flag=1;
+    else
+        cross_flag=0;
+}

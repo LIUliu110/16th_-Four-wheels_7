@@ -52,10 +52,13 @@ void get_mid_line(void);
 float get_error(void);//11.14添加
 int ckeck_out_road(void);//11.14添加
 void search_leftdown_point();
-void     search_rightdown_point();
-void     search_leftup_point();
-void      search_rightup_point();
-void     connect_line_plan();
+void search_rightdown_point();
+void search_leftup_point();
+void search_rightup_point();
+void connect_line_plan();
+void banmaxian();
+void cross_judge();
+
 
 void my_memset(uint8_t* ptr, uint8_t num, uint8_t size);
 #endif //
