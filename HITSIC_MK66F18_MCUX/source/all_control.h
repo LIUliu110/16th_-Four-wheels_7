@@ -17,11 +17,12 @@ extern float servo_pwm;
 extern float motor_speed;
 extern float motor_speed_now;
 extern float P ,  D ;
-extern float data[5];
 extern int counter1,counter2;
 extern int mark;
 extern float fang;
 extern float motor_test_[2];
+
+extern int delay_runcar;
 
 extern int32_t mot_left;  //电机左轮编码器读取
 extern int32_t mot_right; //电机右轮编码器读取
@@ -50,6 +51,7 @@ void servo_pid();
 void motor_test();
 void servo();
 void motor(void);
+void delay_run();
 
 void my_motor_pid(void);//电机pid控制函数
 void my_motor_ctr(void);//电机闭环控制

@@ -293,7 +293,7 @@ void main(void)
 
 void MENU_DataSetUp(void)
 {
-    MENU_ListInsert(menu_menuRoot, MENU_ItemConstruct(nullType, NULL, "EXAMPLE", 0, 0));
+    MENU_ListInsert(menu_menuRoot, MENU_ItemConstruct(nullType, NULL, "four_wheel-7th", 0, 0));
 
     extern uint8_t threshold;
     extern int foresight;
@@ -306,9 +306,12 @@ void MENU_DataSetUp(void)
 
         MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &P, "P", 10, menuItem_data_global));
         MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &D, "D", 1, menuItem_data_global));
-        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &threshold, "threshold", 5, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, & M_left_pwm, "M_left_pwm", 5, menuItem_data_ROFlag));
         MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &motor_speed, "motor_speed", 2, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &M_Kp, "M_Kp", 3, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &M_Ki, "M_Ki", 3, menuItem_data_global));
         MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &foresight, "foresight", 3, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &threshold, "threshold", 5, menuItem_data_global));
 
 
     //TODO: 在这里添加子菜单和菜单项

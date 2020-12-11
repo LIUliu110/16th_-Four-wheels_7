@@ -37,6 +37,7 @@
 extern uint8_t IMG[CAMERA_H][CAMERA_W];//二值化后图像数组
 extern uint8_t image_Buffer_0[CAMERA_H][CAMERA_W];
 extern uint8_t* fullBuffer;//指向灰度图的首地址
+extern int banmaxian_flag;//斑马线标志位
 
 void head_clear(void);
 void THRE(void);

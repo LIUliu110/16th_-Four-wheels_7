@@ -21,6 +21,7 @@ int counter1=0,counter2=0;
 int mark=0;
 float fang=30;
 
+int delay_runcar=0;
 
 int32_t mot_left = 0;           //电机左轮编码器读取值
 int32_t mot_right = 0;          //电机右轮编码器读取值
@@ -60,7 +61,17 @@ void motor_test(){
      }
 }
 
+void delay_run(){
+    if(GPIO_PinRead(GPIOA,9)==1){
+        delay_runcar=0;
+    }
+    else{
 
+
+    }
+
+
+}
 
 
 void servo_pid()
@@ -118,7 +129,18 @@ void my_motor_ctr()//电机闭环控制
     SCFTM_ClearSpeed(FTM1);//测试差速时可以注释掉
     mot_right = -SCFTM_GetSpeed(FTM2);
     SCFTM_ClearSpeed(FTM2);//测试差速时可以注释掉
-    my_motor_pid();
+    if(banmaxian_flag == 1) {Motorsp_Set(0.0,0.0);my_motor_pid();}
+    else my_motor_pid();
+
+    if(delay_runcar== 0)//延迟发车
+        {
+            SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_0, 20000U,0U);
+            SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_1, 20000U, 0U);
+            SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_3, 20000U, 0U);
+            SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_2, 20000U, 0U);
+        }//延时发车
+
+
 
     if(M_right_pwm>0)
     {//右轮正转

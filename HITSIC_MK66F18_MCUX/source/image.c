@@ -456,7 +456,7 @@ void image_main()
                     right_line[i] = j;
             }
         }
-    }
+       }
 
     get_mid_line();
 
