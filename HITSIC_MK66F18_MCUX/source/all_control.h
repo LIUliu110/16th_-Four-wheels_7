@@ -53,6 +53,7 @@ void motor(void);
 
 void my_motor_pid(void);//电机pid控制函数
 void my_motor_ctr(void);//电机闭环控制
-
+void Motorsp_Set(float x,float y);
+void Speed_radio(float x);
 
 #endif /* ALL_CONTROL_H_ */

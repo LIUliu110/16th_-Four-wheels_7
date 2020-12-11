@@ -5,6 +5,7 @@
  *      Author: liuhe
  */
 #include "image.h"
+#include"my_math.h"
 
 int f[10 * CAMERA_H];//考察连通域联通性
 
@@ -41,9 +42,22 @@ uint8_t left_line[CAMERA_H], right_line[CAMERA_H];//赛道的左右边界
 uint8_t mid_line[CAMERA_H];
 int all_connect_num = 0;//所有白条子数
 uint8_t top_road;//赛道最高处所在行数
-uint8_t threshold = 230;//阈值
-int foresight = 84;//前瞻数值
 uint8_t* fullBuffer;
+
+uint8_t threshold = 230;//阈值
+int foresight = 80;//前瞻数值
+//12.10定义的点结构体
+typedef struct {
+    int x;
+    int y;
+}point;
+
+//11.19添加，确定的左上下，右上下四个点
+point determined_leftdown_point;
+point determined_leftup_point;
+point determined_rightdown_point;
+point determined_rightup_point;
+
 ////////////////////////////////////////////
 //功能：二值化
 //输入：灰度图片
@@ -421,6 +435,40 @@ void image_main()
     ordinary_two_line();
     get_mid_line();
 
+    //十字的判断
+    if (
+        my_road[foresight].white_num == 1 &&
+        (
+        (my_road[foresight].connected[1].width)>160
+        ||(my_road[foresight-2].connected[1].width) > 160
+        ||(my_road[foresight-4].connected[1].width) > 160
+        ||(my_road[foresight-6].connected[1].width) > 160
+        || (my_road[foresight - 8].connected[1].width) > 160
+        || (my_road[foresight+2].connected[1].width) > 160
+        || (my_road[foresight + 4].connected[1].width) > 160
+        //|| (my_road[foresight + 6].connected[1].width) > 160
+        )
+        )
+    {
+        search_leftdown_point();
+        search_rightdown_point();
+        search_leftup_point();
+        search_rightup_point();
+//       connect_line_plan();
+//        for (int i = 3; i < 115; i++)
+//        {
+//            for (int j = 3; j < 185; j++)
+//            {
+//                if (IMG[i][j] == 11)
+//                    left_line[i] = j;
+//                if (IMG[i][j] == 12)
+//                    right_line[i] = j;
+//            }
+//        }
+    }
+
+    get_mid_line();
+
     for (int i = NEAR_LINE; i >= FAR_LINE; i--)
         if (mid_line[i] != MISS)
             IMG[i][mid_line[i]] = 0;
@@ -454,5 +502,210 @@ int ckeck_out_road(void)//检测跑出赛道函数
 
 }
 
+//求取斜率
+float check_k(int line, uint8_t* array, int length, int flag)
+{
+    float k = 0;
+    int sumx = 0;
+    int sumy = 0;
+    int sumxy = 0;
+    int sumx2 = 0;
+    for (int i = 0; i < length; i++)
+    {
+        if (flag == 1)
+        {
+            sumx = sumx + line + i;
+            sumy = sumy + array[line + i];
+            sumxy = sumxy + (line + i)*array[line + i];
+            sumx2 = sumx2 + (line + i) * (line + i);
+        }
+        if (flag == 0)
+        {
+            sumx = sumx + line - i;
+            sumy = sumy + array[line - i];
+            sumxy = sumxy + (line - i)*array[line - i];
+            sumx2 = sumx2 + (line - i) * (line - i);
+        }
 
+    }
+    k = -(1.0*sumxy - 1.0*sumx*sumy / length) / (1.0*sumx2 - 1.0*sumx*sumx / length);
+    //k=my_arctan(k);
+    return k;
+}
+
+
+//两点连线，flag是标志位
+void  connect_line(int x1, int y1, int x2, int y2,int flag)
+{
+    float k, b; int x;
+    point line_point;
+    k = (y2 - y1)*1.0 / (x2 - x1);
+    b = y1 - k * x1;
+    for (x = my_min(x1,x2); x < my_max(x1, x2); x++)
+    {
+        line_point.x = x;
+        line_point.y = k * x + b;
+        IMG[line_point.x][line_point.y] = flag;
+    }
+}
+//从确定的四个点，进一步确定不同情况下的连线方式，仅仅作为验证使用，即连线方案,这一步目前还有点bug
+void connect_line_plan()
+{
+    //下边两点不是零
+
+    //determined_leftup_point
+    //determined_leftdown_point
+    //determined_rightup_point
+    //determined_rightdown_point
+
+    int take_points = 5;//最小二乘法考查点数
+    int star_position = 2; //最小二乘法起始点数，如 take_points = 5，star_position = 2;应该考察2——7点计算斜率k，对于下边的点适用
+    //左边两个点都存在
+    if ((determined_leftdown_point.x != 0) && (determined_leftup_point.x != 0))
+        connect_line(determined_leftdown_point.x, determined_leftdown_point.y, determined_leftup_point.x, determined_leftup_point.y,11);
+//    //左下点存在
+//    if ((determined_leftdown_point.x != 0) && (determined_leftup_point.x == 0))
+//    {
+//        int line = 2; float y = 0; int y1 = 0;
+//        float k = check_k(determined_leftdown_point.x+ star_position, left_line, take_points, 1);
+//        y = (determined_leftdown_point.x - line)*k + determined_leftdown_point.y;
+//        y1 = (int)y;
+////        if ((y1 > 187) || (y1 < 0))
+////      y1 = right_line[foresight];
+//        connect_line(determined_leftdown_point.x, determined_leftdown_point.y, line, y1,11);
+//    }
+//
+//    //左上点存在
+//    if ((determined_leftdown_point.x == 0) && (determined_leftup_point.x != 0))
+//    {
+//        int line = 115; float y = 0; int y1 = 0;
+//        float k = check_k(determined_leftup_point.x, left_line, take_points, 0);
+//        y = (determined_leftup_point.x- line)*k + determined_leftup_point.y;
+//        y1 = (int)y;
+//        if ((y1 > 187) || (y1 < 0))
+//            y1 = 0;
+//        connect_line(determined_leftup_point.x, determined_leftup_point.y, line, y1,11);
+//    }
+
+    //右边两个点存在
+    if ((determined_rightdown_point.x != 0) && (determined_rightup_point.x != 0))
+        connect_line(determined_rightdown_point.x, determined_rightdown_point.y, determined_rightup_point.x, determined_rightup_point.y, 12);
+
+//    //右下点存在,右上点不存在
+//    if ((determined_rightdown_point.x != 0) && (determined_rightup_point.x == 0))
+//    {
+//        int line = 2; float y = 0; int y1 = 0;
+//        float k = check_k(determined_rightdown_point.x+ star_position, right_line, take_points, 1);
+//        y = -(line- determined_rightdown_point.x)*k + determined_rightdown_point.y;
+//        y1 = (int)y;
+//        if ((y1 > 187) || (y1 < 0))
+//            y1 = right_line[foresight];
+//
+//        connect_line(determined_rightdown_point.x, determined_rightdown_point.y, line, y1, 12);
+//    }
+
+//    //右上点存在
+//    if ((determined_rightdown_point.x == 0) && (determined_rightup_point.x != 0))
+//    {
+//        int line = 115; float y = 0; int y1 = 0;
+//        float k = check_k(determined_rightup_point.x, right_line, take_points, 0);
+//        y = (line - determined_rightdown_point.x)*k + determined_rightdown_point.y;
+//        y1 = (int)y;
+//        if ((y1 > 187) || (y1 < 0))
+//            y1 = 187;
+//        connect_line(determined_rightup_point.x, determined_rightup_point.y, line, y1,12);
+//    }
+
+}
+//寻找左下右下点粗暴的方法，但是很有用
+void search_leftdown_point()
+{
+    determined_leftdown_point.x = 0;
+    determined_leftdown_point.y = 0;
+    int left_max = left_line[foresight];
+    for (int i = foresight; i < 115; i++)
+    {
+        if (left_line[i] >= left_max)
+        {
+            determined_leftdown_point.x = i;
+            determined_leftdown_point.y = left_line[i];
+            left_max = left_line[i];
+        }
+    }
+    if (determined_leftdown_point.x == 0 && determined_leftdown_point.y == 0)
+    {
+        determined_leftdown_point.x = 115;
+        determined_leftdown_point.y = left_line[115];
+    }
+
+    if (determined_leftdown_point.y < 2)
+    {
+        determined_leftdown_point.x = 115;
+        determined_leftdown_point.y = left_line[115];
+    }
+}
+void search_rightdown_point()
+{
+    determined_rightdown_point.x = 0;
+    determined_rightdown_point.y = 0;
+    int right_min = right_line[foresight];
+    for (int i = foresight; i < 115; i++)
+    {
+        if (right_line[i] <= right_min)
+        {
+            determined_rightdown_point.x = i;
+            determined_rightdown_point.y = right_line[i];
+            right_min = right_line[i];
+        }
+    }
+    if (determined_rightdown_point.x == 0 && determined_rightdown_point.y == 0)
+    {
+        determined_rightdown_point.x = 115;
+        determined_rightdown_point.y = right_line[115];
+    }
+
+    if (determined_rightdown_point.y < 2)
+    {
+        determined_rightdown_point.x = 115;
+        determined_rightdown_point.y = right_line[115];
+    }
+}
+void  search_leftup_point()
+{
+    determined_leftup_point.x = 0;
+    determined_leftup_point.y = 0;
+    for (int i = 5; i < foresight; i++)
+    {
+        if ((left_line[i] - left_line[i+2])>10&& (left_line[i-2]- left_line[i])<=4&& (left_line[i - 2]  -left_line[i])>=0)
+        {
+            determined_leftup_point.x = i;
+            determined_leftup_point.y = left_line[i];
+        }
+    }
+
+    if (determined_leftup_point.y >= determined_rightdown_point.y)
+    {
+        determined_leftup_point.x = 0;
+        determined_leftup_point.y = 0;
+    }
+}
+void search_rightup_point()
+{
+    determined_rightup_point.x = 0;
+    determined_rightup_point.y = 0;
+    for (int i = 5; i <foresight; i++)
+    {
+        if ((right_line[i] - right_line[i + 2]) < -10 && (right_line[i]- right_line[i-2])>=0&& (right_line[i] - right_line[i - 2]) <=4)
+        {
+            determined_rightup_point.x = i;
+            determined_rightup_point.y = right_line[i];
+        }
+
+        if (determined_rightup_point.y < determined_leftdown_point.y)
+        {
+            determined_rightup_point.x = 0;
+            determined_rightup_point.y = 0;
+        }
+    }
+}
 

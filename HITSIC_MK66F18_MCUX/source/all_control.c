@@ -19,7 +19,7 @@ float P = 0.015,  D = 0.01;
 float data[5]={20,30,40};
 int counter1=0,counter2=0;
 int mark=0;
-float fang=40;
+float fang=30;
 
 
 int32_t mot_left = 0;           //电机左轮编码器读取值
@@ -42,18 +42,18 @@ float M_left_pwm = 0;           //左电机pwm值
 float M_right_pwm = 0;          //右电机pwm值
 
 
-
+//产生方波的测试
 void motor_test(){
     if(mark==0){
 //            Motorsp_Set(fang,fang);
-            fang=0;
+            fang=-20;
             M_left_drs = fang;
             M_right_drs = fang;
             mark=1;
      }
     else if(mark==1){
 //            Motorsp_Set(fang,fang);
-            fang=40;
+            fang=20;
             M_left_drs = fang;
             M_right_drs = fang;
             mark=0;
@@ -112,8 +112,6 @@ void my_motor_pid()//电机pid控制算法
         {M_right_pwm =-M_pwm_max;}
 }
 
-
-
 void my_motor_ctr()//电机闭环控制
 {
     mot_left =  SCFTM_GetSpeed(FTM1);
@@ -123,32 +121,59 @@ void my_motor_ctr()//电机闭环控制
     my_motor_pid();
 
     if(M_right_pwm>0)
-    {
-//    SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_0, 20000U,M_right_pwm);//右轮正转kFTM_Chnl_0> kFTM_Chnl_1
-//    SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_1, 20000U, 0U);
+    {//右轮正转
     SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,M_right_pwm);
-    SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_3, 20000U,0);
+    SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_0, 20000U,0);
     }
     else
-    {
-//     SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_0, 20000U, 0U);//右轮反转kFTM_Chnl_0> kFTM_Chnl_1
-//     SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_1, 20000U, -M_right_pwm);
-     SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_3,20000,-M_right_pwm);
+    {//右轮反转
+     SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,-M_right_pwm);
      SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_1, 20000U,0);
     }
+
     if(M_left_pwm>0)
     {
-//    SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_3, 20000U, 0U);
-//    SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_2, 20000U, M_left_pwm);//左轮正转kFTM_Chnl_3> kFTM_Chnl_2
+        //左轮正转kFTM_Chnl_3> kFTM_Chnl_2
         SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,M_left_pwm);
-        SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_0, 20000U,0);
+        SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_3, 20000U,0);
     }
     else
     {
-//        SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_3, 20000U, -M_left_pwm);
-//        SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_2, 20000U, 0U);//左轮反转kFTM_Chnl_3> kFTM_Chnl_2
-        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,-M_left_pwm);
+        //左轮反转kFTM_Chnl_3> kFTM_Chnl_2
+        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_3,20000,-M_left_pwm);
         SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_2, 20000U,0);
     }
 }
 
+
+//给左右编码器赋值
+void Motorsp_Set(float x,float y)
+{
+    M_left_drs=x;
+    M_right_drs=y;
+//    float *p;
+//    p = &M_left_drs;
+//    *p = x;
+//    p = &M_right_drs;
+//    *p = y;
+
+}
+
+//获取差速比
+void Speed_radio(float x)
+{
+    float fa;//差速比例系数
+    float a;//舵机当前pwm值减去舵机中值
+
+    if(x<0)
+        a = -x;
+    else
+        a=x;
+
+    fa = (1.0)*(0.2274*pow(a,3)-0.05485*pow(a,2)+0.7042*a)+1.018;
+
+    if(x>0)
+       Motorsp_Set((M_left_drs/fa),M_left_drs);
+    else
+        Motorsp_Set(M_left_drs,(M_left_drs/fa));
+}
