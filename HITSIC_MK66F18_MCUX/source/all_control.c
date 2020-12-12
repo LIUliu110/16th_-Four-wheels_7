@@ -9,6 +9,8 @@
 #include "sc_ftm.h"
 #include "image.h"
 #include "hitsic_common.h"
+extern int outflag;
+
 float error_n_=0;
 float error_n_1_=0;
 const float servo_mid=7.45;
@@ -20,6 +22,7 @@ float data[5]={20,30,40};
 int counter1=0,counter2=0;
 int mark=0;
 float fang=30;
+float chasubi=1.0;
 
 int delay_runcar=0;
 
@@ -38,10 +41,12 @@ float M_right_drs=60;         //右电机编码器理想值，对应着某一个
 float M_Kp=2;
 float M_Ki=2;
 
-float M_pwm_max = 50;           //限幅值
+float M_pwm_max = 95;           //限幅值
 float M_left_pwm = 0;           //左电机pwm值
 float M_right_pwm = 0;          //右电机pwm值
 
+int check=0,temp=0;
+extern int delaycount;
 
 //产生方波的测试
 void motor_test(){
@@ -62,15 +67,14 @@ void motor_test(){
 }
 
 void delay_run(){
-    if(GPIO_PinRead(GPIOA,9)==1){
-        delay_runcar=0;
+    check=GPIO_PinRead(GPIOA,9);
+    if(temp==1&&check==0){
+//        int i=50000000;
+//        while(i--);
+        delaycount=0;
+        delay_runcar=1;
     }
-    else{
-
-
-    }
-
-
+    temp=check;
 }
 
 
@@ -97,6 +101,7 @@ void motor(void)
 }
 void servo()
 {
+    servo_pid();
     SCFTM_PWM_ChangeHiRes(FTM3,kFTM_Chnl_7,50,servo_pwm);
 }
 
@@ -123,48 +128,55 @@ void my_motor_pid()//电机pid控制算法
         {M_right_pwm =-M_pwm_max;}
 }
 
+
 void my_motor_ctr()//电机闭环控制
 {
-    mot_left =  SCFTM_GetSpeed(FTM1);
-    SCFTM_ClearSpeed(FTM1);//测试差速时可以注释掉
-    mot_right = -SCFTM_GetSpeed(FTM2);
-    SCFTM_ClearSpeed(FTM2);//测试差速时可以注释掉
-    if(banmaxian_flag == 1) {Motorsp_Set(0.0,0.0);my_motor_pid();}
-    else my_motor_pid();
+    if(delaycount>400)
+    {
+        mot_left =  SCFTM_GetSpeed(FTM1);
+        SCFTM_ClearSpeed(FTM1);//测试差速时可以注释掉
+        mot_right = -SCFTM_GetSpeed(FTM2);
+        SCFTM_ClearSpeed(FTM2);//测试差速时可以注释掉
+    //    if(banmaxian_flag==1) {Motorsp_Set(0.0,0.0);my_motor_pid();}
+        my_motor_pid();
+//        if(banmaxian_flag==1){motor_speed=0;banmaxian_flag=0;}
 
-    if(delay_runcar== 0)//延迟发车
+        if(delay_runcar==0||outflag==1)//延迟发车
+            {
+                SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_0, 20000U,0U);
+                SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_1, 20000U, 0U);
+                SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_3, 20000U, 0U);
+                SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_2, 20000U, 0U);
+            }//延时发车
+        else{
+        if(banmaxian_flag==1){motor_speed=0;banmaxian_flag==1;}
+        if(M_right_pwm>0)
+        {//右轮正转
+        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,M_right_pwm);
+        SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_0, 20000U,0);
+        }
+        else
+        {//右轮反转
+         SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,-M_right_pwm);
+         SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_1, 20000U,0);
+        }
+
+        if(M_left_pwm>0)
         {
-            SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_0, 20000U,0U);
-            SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_1, 20000U, 0U);
-            SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_3, 20000U, 0U);
-            SCFTM_PWM_ChangeHiRes(MOTOR_PERIPHERAL, kFTM_Chnl_2, 20000U, 0U);
-        }//延时发车
-
-
-
-    if(M_right_pwm>0)
-    {//右轮正转
-    SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_1,20000,M_right_pwm);
-    SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_0, 20000U,0);
+            //左轮正转kFTM_Chnl_3> kFTM_Chnl_2
+            SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,M_left_pwm);
+            SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_3, 20000U,0);
+        }
+        else
+        {
+            //左轮反转kFTM_Chnl_3> kFTM_Chnl_2
+            SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_3,20000,-M_left_pwm);
+            SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_2, 20000U,0);
+        }
+        }
     }
     else
-    {//右轮反转
-     SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_0,20000,-M_right_pwm);
-     SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_1, 20000U,0);
-    }
-
-    if(M_left_pwm>0)
-    {
-        //左轮正转kFTM_Chnl_3> kFTM_Chnl_2
-        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_2,20000,M_left_pwm);
-        SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_3, 20000U,0);
-    }
-    else
-    {
-        //左轮反转kFTM_Chnl_3> kFTM_Chnl_2
-        SCFTM_PWM_ChangeHiRes(FTM0,kFTM_Chnl_3,20000,-M_left_pwm);
-        SCFTM_PWM_ChangeHiRes(FTM0, kFTM_Chnl_2, 20000U,0);
-    }
+        delaycount++;
 }
 
 
@@ -192,7 +204,7 @@ void Speed_radio(float x)
     else
         a=x;
 
-    fa = (1.0)*(0.2274*pow(a,3)-0.05485*pow(a,2)+0.7042*a)+1.018;
+    fa = (chasubi)*(0.2274*pow(a,3)-0.05485*pow(a,2)+0.7042*a)+1.018;
 
     if(x>0)
        Motorsp_Set((M_left_drs/fa),M_left_drs);

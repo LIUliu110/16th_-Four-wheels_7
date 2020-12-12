@@ -88,8 +88,9 @@ FATFS fatfs;                                   //逻辑驱动器的工作区
 #include "image.h"
 #include "sc_host.h"
 #include "all_control.h"
-
-
+#include "my_math.h"
+int delaycount=0;
+float jiansubi=20;
 float value[5];
 int menu_image_switch(){
             if(GPIO_PinRead(GPIOA,15)==1){
@@ -138,6 +139,10 @@ disp_ssd1306_frameBuffer_t dispBuffer;
 graphic::bufPrint0608_t<disp_ssd1306_frameBuffer_t> bufPrinter(dispBuffer);
 
 void main(void)
+
+
+
+
 {
     /** 初始化阶段，关闭总中断 */
     HAL_EnterCritical();
@@ -237,13 +242,11 @@ void main(void)
 
     while (true)
     {
-
 //           value[0]=fang;
 //           value[1]=M_left_pwm;
 //           value[3]=M_right_pwm;
 //           value[2]=mot_left;
 //           value[4]=mot_right;
-//
 //            SCHOST_VarUpload(value,5);//wifi数据传输
         while (kStatus_Success != DMADVP_TransferGetFullBuffer(DMADVP0, &dmadvpHandle, &fullBuffer));
 //        THRE();
@@ -282,9 +285,10 @@ void main(void)
         DMADVP_TransferSubmitEmptyBuffer(DMADVP0, &dmadvpHandle, fullBuffer);
         THRE();
         //head_clear();
+        delay_run();
         image_main();
-        servo_pid();
-        Motorsp_Set(motor_speed,motor_speed);
+//        servo_pid();
+        Motorsp_Set(motor_speed-jiansubi*my_float_abs(servo_pwm-servo_mid),motor_speed-jiansubi*my_float_abs(servo_pwm-servo_mid));
         Speed_radio((servo_pwm-servo_mid));
 
         //TODO: 在这里添加车模保护代码
@@ -297,6 +301,8 @@ void MENU_DataSetUp(void)
 
     extern uint8_t threshold;
     extern int foresight;
+    extern float chasubi;
+    extern float motor_speed;
     static menu_list_t *parameter;
 
 
@@ -304,15 +310,16 @@ void MENU_DataSetUp(void)
     assert(parameter);
     MENU_ListInsert(menu_menuRoot, MENU_ItemConstruct(menuType,parameter, "parameter", 0, 0));
 
-        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &P, "P", 10, menuItem_data_global));
-        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &D, "D", 1, menuItem_data_global));
-        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, & M_left_pwm, "M_left_pwm", 5, menuItem_data_ROFlag));
-        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &motor_speed, "motor_speed", 2, menuItem_data_global));
-        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &M_Kp, "M_Kp", 3, menuItem_data_global));
-        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &M_Ki, "M_Ki", 3, menuItem_data_global));
-        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &foresight, "foresight", 3, menuItem_data_global));
-        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &threshold, "threshold", 5, menuItem_data_global));
-
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &P, "P", 100, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &D, "D", 101, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, & M_left_pwm, "M_left_pwm", 105, menuItem_data_ROFlag));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &motor_speed, "motor_speed", 93, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &M_Kp, "M_Kp", 94, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &M_Ki, "M_Ki", 95, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &foresight, "foresight", 103, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(variType, &threshold, "threshold", 107, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &chasubi, "chasubi", 105, menuItem_data_global));
+        MENU_ListInsert(parameter, MENU_ItemConstruct(varfType, &jiansubi, "jiansubi", 106, menuItem_data_global));
 
     //TODO: 在这里添加子菜单和菜单项
     MENU_DataSetupTest(menu_menuRoot);
